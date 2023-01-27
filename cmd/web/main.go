@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/SilberHuang/web-reservation/pkg/config"
-	"github.com/SilberHuang/web-reservation/pkg/handlers"
-	"github.com/SilberHuang/web-reservation/pkg/render"
+	"github.com/SilberHuang/web-reservation/internal/config"
+	"github.com/SilberHuang/web-reservation/internal/handlers"
+	"github.com/SilberHuang/web-reservation/internal/render"
 	"github.com/alexedwards/scs/v2"
 )
 
