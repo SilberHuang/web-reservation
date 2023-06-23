@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/SilberHuang/web-reservation/internal/config"
+	"github.com/SilberHuang/web-reservation/internal/driver"
 	"github.com/SilberHuang/web-reservation/internal/handlers"
 	"github.com/SilberHuang/web-reservation/internal/models"
 	"github.com/SilberHuang/web-reservation/internal/render"
@@ -23,10 +24,11 @@ var infoLog *log.Logger
 var errorLog *log.Logger
 
 func main() {
-	err := run()
+	db, err := run()
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer db.SQL.Close()
 
 	fmt.Println(fmt.Sprintf("Starting application on port: %s", PortNumber))
 
@@ -41,7 +43,7 @@ func main() {
 	}
 }
 
-func run() error {
+func run() (*driver.DB, error) {
 	gob.Register(models.Reservation{})
 	app.InProduction = false
 
@@ -57,17 +59,26 @@ func run() error {
 	session.Cookie.Secure = app.InProduction
 	app.Session = session
 
+	log.Println("connecting to database...")
+
+	db, err := driver.ConnectSQL("host=localhost port=5433 dbname=bookings user=postgres password=8717")
+
+	if err != nil {
+		log.Fatal("database cannot connect!")
+		return nil, err
+	}
+
 	tc, err := render.CreateTemplateCache()
 	if err != nil {
 		log.Fatal("can't create template cache")
-		return err
+		return nil, err
 	}
 	app.TemplateCache = tc
 	app.UseCache = false
 
-	repo := handlers.NewRepo(&app)
+	repo := handlers.NewRepo(&app, db)
 	handlers.NewHandlers(repo)
 	render.NewTemplates(&app)
 
-	return nil
+	return db, nil
 }

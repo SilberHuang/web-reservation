@@ -1,5 +1,4 @@
 package handlers
- package handlers
 
 import (
 	"encoding/json"
@@ -8,16 +7,20 @@ import (
 	"net/http"
 
 	"github.com/SilberHuang/web-reservation/internal/config"
+	"github.com/SilberHuang/web-reservation/internal/driver"
 	"github.com/SilberHuang/web-reservation/internal/forms"
 	"github.com/SilberHuang/web-reservation/internal/helpers"
 	"github.com/SilberHuang/web-reservation/internal/models"
 	"github.com/SilberHuang/web-reservation/internal/render"
+	"github.com/SilberHuang/web-reservation/internal/repository"
+	"github.com/SilberHuang/web-reservation/internal/repository/dbrepo"
 )
 
 var Repo *Repository
 
 type Repository struct {
 	App *config.AppConfig
+	DB  repository.DatabaseRepo
 }
 
 type jsonResponse struct {
@@ -25,9 +28,10 @@ type jsonResponse struct {
 	Message string `json:"message"`
 }
 
-func NewRepo(a *config.AppConfig) *Repository {
+func NewRepo(a *config.AppConfig, db *driver.DB) *Repository {
 	return &Repository{
 		App: a,
+		DB:  dbrepo.NewPostgresRepo(db.SQL, a),
 	}
 }
 
